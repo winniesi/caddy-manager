@@ -117,7 +117,7 @@ async function loadConfig() {
     try {
         const result = await api('/config');
         if (result.success) {
-            domains = result.domains;
+            domains = result.domains || [];
             renderDomains();
         }
     } catch (error) {
@@ -137,7 +137,7 @@ async function saveConfig() {
             showToast('配置已保存，Caddy 已重启，DDNS 已同步', 'success');
             updateDdnsStatus();
         } else {
-            showToast('保存失败: ' + (result.restart?.output || result.ddns?.output || ''), 'error');
+            showToast('保存失败: ' + (result.error || ''), 'error');
         }
     } catch (error) {
         showToast('保存失败: ' + error.message, 'error');
@@ -245,7 +245,7 @@ function renderPortList(ports) {
         div.innerHTML = `
             <span class="port-number">${port.port}</span>
             <span class="port-service">${port.service}</span>
-            <span class="port-process">${port.process}</span>
+            <span class="port-container">${port.container}</span>
         `;
         div.addEventListener('click', () => {
             elements.port.value = port.port;
@@ -269,9 +269,9 @@ function searchPorts() {
     items.forEach(item => {
         const port = item.querySelector('.port-number').textContent;
         const service = item.querySelector('.port-service').textContent.toLowerCase();
-        const process = item.querySelector('.port-process').textContent.toLowerCase();
+        const container = item.querySelector('.port-container').textContent.toLowerCase();
 
-        const match = port.includes(query) || service.includes(query) || process.includes(query);
+        const match = port.includes(query) || service.includes(query) || container.includes(query);
         item.style.display = match ? 'flex' : 'none';
     });
 }
@@ -288,7 +288,7 @@ async function syncDdns() {
             showToast('DDNS 同步完成', 'success');
             updateDdnsStatus();
         } else {
-            showToast('DDNS 同步失败: ' + result.output, 'error');
+            showToast('DDNS 同步失败: ' + (result.output || result.error || ''), 'error');
         }
     } catch (error) {
         showToast('DDNS 同步失败: ' + error.message, 'error');
