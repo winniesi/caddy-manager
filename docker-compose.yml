@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  caddy-manager:
+    build: .
+    image: winniesi/caddy-manager:latest
+    container_name: caddy-manager
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      # Caddy 配置文件
+      - /vol1/1000/workspace/docker/Caddy/Caddyfile:/data/Caddyfile
+      # DDNS 脚本目录
+      - /vol1/1000/workspace/scripts/caddy-cloudflare-ddns:/data/ddns
+      # Docker socket（用于重启 Caddy 容器）
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - CADDYFILE_PATH=/data/Caddyfile
+      - DDNS_SCRIPT_PATH=/data/ddns/caddy_ddns_sync.py
+      - DDNS_VENV_PATH=/data/ddns/venv/bin/python
+      - DDNS_LOG_PATH=/data/ddns/caddy_ddns.log
+      - CADDY_CONTAINER_NAME=caddy-cloudflare
+    networks:
+      - caddy-net
+
+networks:
+  caddy-net:
+    external: true

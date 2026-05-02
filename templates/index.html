@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caddy Manager</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <header class="header">
+            <div class="header-left">
+                <h1>🔧 Caddy Manager</h1>
+                <span class="subtitle">反向代理配置管理</span>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-primary" id="btnSave">
+                    <span class="btn-icon">💾</span>
+                    保存配置
+                </button>
+            </div>
+        </header>
+
+        <!-- 主内容 -->
+        <main class="main">
+            <!-- 域名配置卡片 -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>域名配置</h2>
+                    <span class="domain-count" id="domainCount">0 个域名</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th width="40">#</th>
+                                    <th>子域名</th>
+                                    <th width="120">端口</th>
+                                    <th width="80">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="domainTable">
+                                <!-- 动态填充 -->
+                            </tbody>
+                        </table>
+                        <div class="empty-state" id="emptyState">
+                            <p>暂无域名配置</p>
+                            <p class="hint">在下方添加新域名</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 添加域名卡片 -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>添加新域名</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="subdomain">子域名</label>
+                            <div class="input-with-suffix">
+                                <input type="text" id="subdomain" placeholder="例如: emby">
+                                <span class="input-suffix">.winnie.si</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="port">端口</label>
+                            <div class="input-with-button">
+                                <input type="number" id="port" placeholder="例如: 8096">
+                                <button class="btn btn-secondary" id="btnScanPorts">
+                                    扫描端口
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group form-action">
+                            <button class="btn btn-primary" id="btnAdd">
+                                <span class="btn-icon">➕</span>
+                                添加
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DDNS 状态卡片 -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>DDNS 状态</h2>
+                    <div class="status-indicator">
+                        <span class="status-dot" id="statusDot"></span>
+                        <span class="status-text" id="statusText">未知</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="ddns-info">
+                        <div class="info-item">
+                            <span class="info-label">最后同步:</span>
+                            <span class="info-value" id="lastSync">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">同步域名:</span>
+                            <span class="info-value" id="syncDomains">-</span>
+                        </div>
+                    </div>
+                    <div class="ddns-actions">
+                        <button class="btn btn-secondary" id="btnSyncDdns">
+                            <span class="btn-icon">🔄</span>
+                            立即同步
+                        </button>
+                        <button class="btn btn-secondary" id="btnViewLog">
+                            <span class="btn-icon">📋</span>
+                            查看日志
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 端口扫描模态框 -->
+    <div class="modal" id="portModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>可用端口</h3>
+                <button class="modal-close" id="btnCloseModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="port-search">
+                    <input type="text" id="portSearch" placeholder="搜索端口或服务...">
+                </div>
+                <div class="port-list" id="portList">
+                    <!-- 动态填充 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 日志模态框 -->
+    <div class="modal" id="logModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>DDNS 日志</h3>
+                <button class="modal-close" id="btnCloseLogModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <pre class="log-content" id="logContent">加载中...</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认弹窗 -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3>确认删除</h3>
+                <button class="modal-close" id="btnCloseDeleteModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="delete-message">确定要删除 <strong id="deleteDomain"></strong> 吗？</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnCancelDelete">取消</button>
+                <button class="btn btn-danger" id="btnConfirmDelete">删除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 提示消息 -->
+    <div class="toast" id="toast">
+        <span class="toast-icon" id="toastIcon"></span>
+        <span class="toast-message" id="toastMessage"></span>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
