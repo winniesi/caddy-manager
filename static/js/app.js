@@ -85,6 +85,7 @@ function renderDomains() {
 
     domains.forEach((domain, index) => {
         const tr = document.createElement('tr');
+        const link = `https://${domain.domain}:8443`;
         tr.innerHTML = `
             <td>${index + 1}</td>
             <td>
@@ -92,7 +93,12 @@ function renderDomains() {
                 <span class="domain-suffix">.winnie.si</span>
             </td>
             <td>
-                <code class="port-code">${domain.port}</code>
+                <code class="port-code">8443</code>
+            </td>
+            <td>
+                <a href="${link}" target="_blank" class="domain-link" title="打开 ${link}">
+                    ${domain.domain}
+                </a>
             </td>
             <td>
                 <button class="btn btn-icon btn-delete" data-index="${index}" title="删除">

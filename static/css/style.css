@@ -502,42 +502,40 @@ body {
 }
 
 .port-number {
-    font-family: "SF Mono", Monaco, Consolas, "Courier New", monospace;
+    font-family: "SF Mono", "Monaco", "Menlo", monospace;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--color-primary);
-    width: 60px;
+    margin-right: 12px;
 }
 
 .port-service {
-    flex: 1;
     font-size: 14px;
     color: var(--color-gray-700);
 }
 
-.port-process {
+.port-container {
     font-size: 12px;
     color: var(--color-gray-400);
-    margin-left: 8px;
+    margin-left: auto;
 }
 
 /* 日志 */
 .log-content {
-    font-family: "SF Mono", Monaco, Consolas, "Courier New", monospace;
+    font-family: "SF Mono", "Monaco", "Menlo", monospace;
     font-size: 12px;
-    line-height: 1.6;
+    line-height: 1.8;
     color: var(--color-gray-700);
     background: var(--color-gray-50);
     padding: 16px;
     border-radius: var(--radius-md);
-    overflow-x: auto;
-    white-space: pre-wrap;
-    word-break: break-all;
     max-height: 400px;
     overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
 }
 
-/* 删除确认 */
+/* 删除弹窗 */
 .delete-message {
     font-size: 14px;
     color: var(--color-gray-600);
@@ -545,31 +543,27 @@ body {
     padding: 10px 0;
 }
 
-.delete-message strong {
-    color: var(--color-gray-900);
-}
-
 /* 提示消息 */
 .toast {
     position: fixed;
     bottom: 24px;
-    right: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--color-gray-800);
+    color: white;
+    padding: 12px 20px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 12px 20px;
-    background: var(--color-gray-800);
-    color: white;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
-    transform: translateY(100px);
+    z-index: 2000;
     opacity: 0;
     transition: all 0.3s ease;
-    z-index: 2000;
 }
 
 .toast.show {
-    transform: translateY(0);
+    transform: translateX(-50%) translateY(0);
     opacity: 1;
 }
 
@@ -581,15 +575,15 @@ body {
     font-size: 14px;
 }
 
-/* 加载状态 */
+/* 加载动画 */
 .loading {
     display: inline-block;
     width: 16px;
     height: 16px;
-    border: 2px solid var(--color-gray-300);
-    border-top-color: var(--color-primary);
+    border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    border-top-color: white;
+    animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
@@ -598,29 +592,58 @@ body {
     }
 }
 
+/* 域名样式 */
+.domain-name {
+    font-weight: 500;
+    color: var(--color-gray-800);
+}
+
+.domain-suffix {
+    color: var(--color-gray-400);
+    font-size: 13px;
+}
+
+.port-code {
+    font-family: "SF Mono", "Monaco", "Menlo", monospace;
+    font-size: 13px;
+    background: var(--color-gray-100);
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: var(--color-primary);
+}
+
+/* 域名链接 */
+.domain-link {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-size: 13px;
+    transition: var(--transition);
+}
+
+.domain-link:hover {
+    color: var(--color-primary-dark);
+    text-decoration: underline;
+}
+
 /* 响应式 */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
     .container {
-        padding: 12px;
+        padding: 16px;
     }
 
     .header {
         flex-direction: column;
-        gap: 12px;
-        align-items: flex-start;
+        gap: 16px;
+        text-align: center;
+    }
+
+    .header-left {
+        flex-direction: column;
+        align-items: center;
     }
 
     .form-row {
         flex-direction: column;
-    }
-
-    .form-action {
-        width: 100%;
-    }
-
-    .form-action .btn {
-        width: 100%;
-        justify-content: center;
     }
 
     .ddns-info {
@@ -636,23 +659,4 @@ body {
         width: 100%;
         justify-content: center;
     }
-}
-
-/* 滚动条 */
-::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
-
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--color-gray-300);
-    border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--color-gray-400);
 }
