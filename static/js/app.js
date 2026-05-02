@@ -242,18 +242,25 @@ function renderPortList(ports) {
         return;
     }
 
+    // 获取已使用的端口
+    const usedPorts = new Set(domains.map(d => d.port));
+
     ports.forEach(port => {
+        const isUsed = usedPorts.has(port.port);
         const div = document.createElement('div');
-        div.className = 'port-item';
+        div.className = `port-item ${isUsed ? 'port-used' : ''}`;
         div.innerHTML = `
             <span class="port-number">${port.port}</span>
             <span class="port-service">${port.service}</span>
             <span class="port-container">${port.container}</span>
+            ${isUsed ? '<span class="port-badge">已添加</span>' : ''}
         `;
-        div.addEventListener('click', () => {
-            elements.port.value = port.port;
-            closePortModal();
-        });
+        if (!isUsed) {
+            div.addEventListener('click', () => {
+                elements.port.value = port.port;
+                closePortModal();
+            });
+        }
         elements.portList.appendChild(div);
     });
 }
