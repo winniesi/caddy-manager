@@ -119,35 +119,36 @@ def update_caddyfile(domains):
 
 
 def scan_ports():
-    """扫描主机所有监听端口"""
+    """扫描 Docker 容器端口映射"""
     ports = []
     try:
-        # 使用 ss 命令扫描
+        # 使用 docker ps 获取所有容器的端口映射
         result = subprocess.run(
-            ["ss", "-tlnp"], capture_output=True, text=True, timeout=10
+            ["docker", "ps", "--format", "{{.Names}}\t{{.Ports}}"],
+            capture_output=True,
+            text=True,
+            timeout=10,
         )
         if result.returncode == 0:
-            for line in result.stdout.split("\n"):
-                if "LISTEN" in line:
-                    parts = line.split()
-                    # 提取端口
-                    addr = parts[3] if len(parts) > 3 else ""
-                    port_match = re.search(r":(\d+)$", addr)
-                    if port_match:
-                        port = int(port_match.group(1))
-                        # 提取进程名
-                        process = ""
-                        proc_match = re.search(r"users:\(\(\"([^\"]+)\"", line)
-                        if proc_match:
-                            process = proc_match.group(1)
+            for line in result.stdout.strip().split("\n"):
+                if not line:
+                    continue
+                parts = line.split("\t")
+                if len(parts) >= 2:
+                    container_name = parts[0]
+                    ports_str = parts[1]
 
+                    # 解析端口映射，例如: 0.0.0.0:8097->8096/tcp
+                    port_matches = re.findall(r"0\.0\.0\.0:(\d+)->(\d+)/tcp", ports_str)
+                    for host_port, container_port in port_matches:
+                        host_port = int(host_port)
                         # 获取服务名
-                        service = COMMON_SERVICES.get(port, process or "Unknown")
+                        service = COMMON_SERVICES.get(host_port, container_name)
 
                         ports.append(
                             {
-                                "port": port,
-                                "process": process,
+                                "port": host_port,
+                                "container": container_name,
                                 "service": service,
                             }
                         )
@@ -180,20 +181,30 @@ def restart_caddy():
 
 
 def run_ddns_sync():
-    """运行 DDNS 同步脚本"""
+    """运行 DDNS 同步脚本（在宿主机上执行）"""
     try:
-        # 使用虚拟环境的 Python
-        python_path = DDNS_VENV_PATH
-        if not os.path.exists(python_path):
-            python_path = "python3"
-
+        # 使用 docker exec 在宿主机上执行 DDNS 脚本
+        # 首先尝试使用宿主机的 Python 环境
+        cmd = f"docker exec {CADDY_CONTAINER_NAME} python3 {DDNS_SCRIPT_PATH}"
         result = subprocess.run(
-            [python_path, DDNS_SCRIPT_PATH],
+            cmd,
+            shell=True,
             capture_output=True,
             text=True,
             timeout=60,
-            cwd=os.path.dirname(DDNS_SCRIPT_PATH),
         )
+
+        # 如果失败，尝试使用虚拟环境
+        if result.returncode != 0:
+            cmd = f"docker exec {CADDY_CONTAINER_NAME} {DDNS_VENV_PATH} {DDNS_SCRIPT_PATH}"
+            result = subprocess.run(
+                cmd,
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=60,
+            )
+
         return result.returncode == 0, result.stdout + result.stderr
     except Exception as e:
         return False, str(e)

@@ -2,7 +2,7 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# 安装依赖
+# 安装依赖（包括 requests 用于 DDNS 脚本）
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
