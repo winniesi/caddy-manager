@@ -89,16 +89,13 @@ function renderDomains() {
         tr.innerHTML = `
             <td>${index + 1}</td>
             <td>
-                <span class="domain-name">${domain.subdomain}</span>
+                <a href="${link}" target="_blank" class="domain-link" title="打开 ${link}">
+                    ${domain.subdomain}
+                </a>
                 <span class="domain-suffix">.winnie.si</span>
             </td>
             <td>
-                <code class="port-code">8443</code>
-            </td>
-            <td>
-                <a href="${link}" target="_blank" class="domain-link" title="打开 ${link}">
-                    ${domain.domain}
-                </a>
+                <code class="port-code">${domain.port}</code>
             </td>
             <td>
                 <button class="btn btn-icon btn-delete" data-index="${index}" title="删除">
